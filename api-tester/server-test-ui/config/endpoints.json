@@ -1,0 +1,146 @@
+[
+  {
+    "method": "GET",
+    "path": "/",
+    "description": "Root endpoint with server information",
+    "parameters": [],
+    "body": null,
+    "curl": "curl -X GET 'http://localhost:8011/'"
+  },
+  {
+    "method": "GET",
+    "path": "/health",
+    "description": "Health check endpoint",
+    "parameters": [],
+    "body": null,
+    "curl": "curl -X GET 'http://localhost:8011/health'"
+  },
+  {
+    "method": "GET",
+    "path": "/status",
+    "description": "Detailed server status",
+    "parameters": [],
+    "body": null,
+    "curl": "curl -X GET 'http://localhost:8011/status'"
+  },
+  {
+    "method": "POST",
+    "path": "/verify_code",
+    "description": "Mock code verification endpoint",
+    "parameters": [],
+    "body": {
+      "name": "request",
+      "type": "CodeRequest",
+      "required": true,
+      "example": {
+        "code": "string",
+        "language": "string"
+      },
+      "schema": [
+        {
+          "name": "code",
+          "type": "str",
+          "required": true,
+          "default": "string"
+        },
+        {
+          "name": "language",
+          "type": "str",
+          "required": true,
+          "default": "string"
+        }
+      ]
+    },
+    "curl": "curl -X POST 'http://localhost:8011/verify_code' -H 'Content-Type: application/json' -d '{\"code\": \"string\", \"language\": \"string\"}'"
+  },
+  {
+    "method": "POST",
+    "path": "/search_memory",
+    "description": "Mock memory search endpoint",
+    "parameters": [],
+    "body": {
+      "name": "request",
+      "type": "QueryRequest",
+      "required": true,
+      "example": {
+        "query": "string",
+        "max_results": 0
+      },
+      "schema": [
+        {
+          "name": "query",
+          "type": "str",
+          "required": true,
+          "default": "string"
+        },
+        {
+          "name": "max_results",
+          "type": "int",
+          "required": true,
+          "default": 0
+        }
+      ]
+    },
+    "curl": "curl -X POST 'http://localhost:8011/search_memory' -H 'Content-Type: application/json' -d '{\"query\": \"string\", \"max_results\": 0}'"
+  },
+  {
+    "method": "POST",
+    "path": "/analyze_code",
+    "description": "Mock comprehensive code analysis",
+    "parameters": [],
+    "body": {
+      "name": "request",
+      "type": "CodeRequest",
+      "required": true,
+      "example": {
+        "code": "string",
+        "language": "string"
+      },
+      "schema": [
+        {
+          "name": "code",
+          "type": "str",
+          "required": true,
+          "default": "string"
+        },
+        {
+          "name": "language",
+          "type": "str",
+          "required": true,
+          "default": "string"
+        }
+      ]
+    },
+    "curl": "curl -X POST 'http://localhost:8011/analyze_code' -H 'Content-Type: application/json' -d '{\"code\": \"string\", \"language\": \"string\"}'"
+  },
+  {
+    "method": "POST",
+    "path": "/execute_code",
+    "description": "Mock code execution endpoint",
+    "parameters": [],
+    "body": {
+      "name": "request",
+      "type": "CodeRequest",
+      "required": true,
+      "example": {
+        "code": "string",
+        "language": "string"
+      },
+      "schema": [
+        {
+          "name": "code",
+          "type": "str",
+          "required": true,
+          "default": "string"
+        },
+        {
+          "name": "language",
+          "type": "str",
+          "required": true,
+          "default": "string"
+        }
+      ]
+    },
+    "curl": "curl -X POST 'http://localhost:8011/execute_code' -H 'Content-Type: application/json' -d '{\"code\": \"string\", \"language\": \"string\"}'"
+  }
+]

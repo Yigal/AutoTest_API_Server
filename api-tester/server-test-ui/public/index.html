@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Tester</title>
+    <link rel="stylesheet" href="style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fira+Code:wght@400;500&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="header">
+                <h1>API Tester</h1>
+                <div class="status-badge" id="server-status">Connecting...</div>
+                <div class="nav-tabs">
+                    <button class="nav-tab active" data-target="manual-view">Manual</button>
+                    <button class="nav-tab" data-target="auto-view">Auto Runner</button>
+                    <button class="nav-tab" data-target="debugger-view">Debugger</button>
+                </div>
+            </div>
+            <div class="endpoint-list" id="endpoint-list">
+                <!-- Endpoints will be populated here -->
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- Manual View -->
+            <div id="manual-view" class="view-container active">
+                <div class="request-panel">
+                    <div class="panel-header">
+                        <h2>Request</h2>
+                        <button class="btn-secondary" id="copy-curl-btn">Copy Curl</button>
+                    </div>
+                    <div class="request-config" id="request-config">
+                        <div class="empty-state">Select an endpoint to start testing</div>
+                    </div>
+                    <div class="action-bar">
+                        <button class="btn-primary" id="send-btn" disabled>Send Request</button>
+                    </div>
+                </div>
+
+                <div class="response-panel">
+                    <div class="panel-header">
+                        <h2>Response</h2>
+                        <div class="toggle-group">
+                            <button class="toggle-btn active" data-view="pretty">Pretty</button>
+                            <button class="toggle-btn" data-view="raw">Raw</button>
+                        </div>
+                    </div>
+                    <div class="response-meta" id="response-meta">
+                        <span class="meta-item">Status: <span id="status-code">-</span></span>
+                        <span class="meta-item">Time: <span id="response-time">-</span></span>
+                    </div>
+                    <div class="response-body">
+                        <pre id="response-content"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Auto Runner View -->
+            <div id="auto-view" class="view-container">
+                <div class="runner-panel">
+                    <div class="panel-header">
+                        <h2>Test Runner</h2>
+                    </div>
+                    <div class="runner-content">
+                        <div class="runner-stats" id="runner-stats" style="display: none;">
+                            <div class="stat-item">Total: <span id="stat-total">0</span></div>
+                            <div class="stat-item success">Passed: <span id="stat-passed">0</span></div>
+                            <div class="stat-item error">Failed: <span id="stat-failed">0</span></div>
+                        </div>
+                        <table class="results-table">
+                            <thead>
+                                <tr>
+                                    <th>Method</th>
+                                    <th>Path</th>
+                                    <th>Status</th>
+                                    <th>Time</th>
+                                    <th>Result</th>
+                                </tr>
+                            </thead>
+                            <tbody id="results-body">
+                                <!-- Results will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Debugger View -->
+            <div id="debugger-view" class="view-container">
+                <div class="debugger-layout">
+                    <div class="debug-controls-panel">
+                        <div class="panel-header">
+                            <h2>Debugger</h2>
+                            <button class="btn-primary" id="start-debug-btn">Start Debug</button>
+                        </div>
+                        <div class="debug-toolbar">
+                            <button class="btn-secondary" id="step-prev-btn" disabled>← Prev</button>
+                            <span id="step-counter">Step 0 / 0</span>
+                            <button class="btn-secondary" id="step-next-btn" disabled>Next →</button>
+                        </div>
+                        <div class="variable-inspector">
+                            <h3>Local Variables</h3>
+                            <table class="vars-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="vars-body">
+                                    <!-- Variables will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="code-viewer-panel">
+                        <div class="panel-header">
+                            <h2>Source Code</h2>
+                        </div>
+                        <div class="code-container">
+                            <pre><code id="debug-source-code" class="language-python"># Select an endpoint and click 'Start Debug' to see source code</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
