@@ -3,7 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 import inspect
-from debug_utils import Tracer
+# Note: This is a sample API server
+# In a real scenario, you would import your own utilities
+# from debug_utils import Tracer  # Uncomment if using debug utilities
 import json
 
 app = FastAPI(title="Sample API Server", description="A sample API server for testing purposes.")

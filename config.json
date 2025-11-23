@@ -1,8 +1,10 @@
 {
-  "testerPort": 8010,
-  "serverPort": 8011,
+  "app": {
+    "host": "0.0.0.0",
+    "port": 3020
+  },
   "autoKillPorts": true,
   "pythonServerFile": "/Users/yigalweinberger/Documents/Code/startups/docker_agents_server/test_server.py",
-  "endpointsOutputFile": "frontend/config/endpoints.json",
+  "endpointsOutputFile": "config/endpoints.json",
   "autoGenerateEndpoints": true
 }

@@ -122,7 +122,7 @@ def parse_fastapi_file(file_path: str) -> List[Dict[str, Any]]:
                                 })
 
                         # Generate curl command
-                        curl_cmd = f"curl -X {method} 'http://localhost:8011{path}'"
+                        curl_cmd = f"curl -X {method} 'http://localhost:{server_port}{path}'"
                         
                         # Add query params to curl
                         query_params = [a for a in args if a["in"] == "query"]
@@ -153,19 +153,23 @@ def parse_fastapi_file(file_path: str) -> List[Dict[str, Any]]:
 
 def main():
     # Read config (from root directory)
-    config_path = os.path.join(os.path.dirname(__file__), '..', 'config.json')
+    PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    config_path = os.path.join(PROJECT_ROOT, 'config.json')
     try:
         with open(config_path, "r") as f:
             config = json.load(f)
     except FileNotFoundError:
         print("config.json not found. Using defaults.")
         config = {
-            "pythonServerFile": "./api_server.py",
-            "endpointsOutputFile": "frontend/config/endpoints.json"
+            "app": {"host": "0.0.0.0", "port": 3020},
+            "pythonServerFile": "./examples/sample_api.py",
+            "endpointsOutputFile": "config/endpoints.json"
         }
 
-    server_file = config.get("pythonServerFile", "./api_server.py")
-    output_file = config.get("endpointsOutputFile", "frontend/config/endpoints.json")
+    server_file = config.get("pythonServerFile", "./examples/sample_api.py")
+    output_file = config.get("endpointsOutputFile", "config/endpoints.json")
+    app_config = config.get("app", {})
+    server_port = app_config.get("port", 3020)
 
     if not os.path.exists(server_file):
         print(f"Error: Server file {server_file} not found.")
@@ -181,6 +185,10 @@ def main():
         json.dump(endpoints, f, indent=2)
     
     print(f"Generated {len(endpoints)} endpoints in {output_file}")
+
+def main_entry():
+    """Entry point for module execution"""
+    main()
 
 if __name__ == "__main__":
     main()

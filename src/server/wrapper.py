@@ -5,15 +5,27 @@ import os
 import importlib.util
 import inspect
 from fastapi import Request, HTTPException
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from debug_utils import Tracer
+import httpx
+
+# Add project root to path for imports
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, PROJECT_ROOT)
+
+from src.server.utils import Tracer
 
 # Load config (from root directory)
-config_path = os.path.join(os.path.dirname(__file__), '..', 'config.json')
+config_path = os.path.join(PROJECT_ROOT, 'config.json')
 with open(config_path, 'r') as f:
     config = json.load(f)
 
-SERVER_PORT = config.get('serverPort', 8011)
+# Get app configuration
+app_config = config.get('app', {})
+SERVER_HOST = app_config.get('host', '0.0.0.0')
+SERVER_PORT = app_config.get('port', 3020)
 PYTHON_FILE = config.get('pythonServerFile', './api_server.py')
 
 def load_user_app(file_path):
@@ -37,6 +49,126 @@ try:
 except Exception as e:
     print(f"Error loading user server: {e}")
     sys.exit(1)
+
+# --- Setup Frontend Serving ---
+
+# Get project root directory (parent of src)
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+STATIC_DIR = os.path.join(PROJECT_ROOT, 'static')
+CONFIG_DIR = os.path.join(PROJECT_ROOT, 'config')
+
+# Mount static files
+if os.path.exists(STATIC_DIR):
+    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+    print(f"Mounted static files from {STATIC_DIR}")
+
+# Check if user app has a root route and handle it
+has_root_route = False
+user_root_handler = None
+user_root_methods = set()
+
+# Find and remove user's root route if it exists
+routes_to_remove = []
+for route in app.routes:
+    if hasattr(route, "path") and route.path == "/":
+        has_root_route = True
+        user_root_handler = route.endpoint
+        if hasattr(route, "methods"):
+            user_root_methods = route.methods
+        routes_to_remove.append(route)
+
+# Remove user's root routes
+for route in routes_to_remove:
+    app.routes.remove(route)
+
+# If user had a root route, add it to /api/root for backward compatibility
+if has_root_route and user_root_handler:
+    # Recreate the route at /api/root
+    from fastapi.routing import APIRoute
+    if "GET" in user_root_methods:
+        @app.get("/api/root")
+        async def user_root_alternative():
+            """Alternative route for user's root endpoint"""
+            if inspect.iscoroutinefunction(user_root_handler):
+                return await user_root_handler()
+            else:
+                return user_root_handler()
+    print("User app root route moved to /api/root (UI is now at /)")
+
+# Always serve UI at root - this is the primary interface
+# The UI automatically loads from the port defined in config.json
+@app.get("/", response_class=FileResponse)
+async def read_root():
+    """Serve the UI at root - automatically loads from config.json port"""
+    index_path = os.path.join(STATIC_DIR, "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    return {"message": "API Server is running", "frontend": "not found"}
+
+# Frontend API endpoints
+@app.get("/api/config")
+async def get_config():
+    """Returns server configuration for the frontend"""
+    return {
+        "serverPort": SERVER_PORT,
+        "serverHost": SERVER_HOST,
+        "serverUrl": f"http://localhost:{SERVER_PORT}"
+    }
+
+@app.get("/api/endpoints")
+async def get_endpoints():
+    """Returns the generated endpoints configuration"""
+    endpoints_path = os.path.join(CONFIG_DIR, "endpoints.json")
+    if os.path.exists(endpoints_path):
+        try:
+            with open(endpoints_path, 'r') as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"Error reading endpoints: {e}")
+            return []
+    return []
+
+@app.post("/api/proxy")
+async def proxy_request(request: Request):
+    """Proxies requests to the FastAPI backend (for backward compatibility)"""
+    try:
+        data = await request.json()
+        method = data.get("method", "GET")
+        url = data.get("url")
+        headers = data.get("headers", {})
+        body = data.get("body")
+        
+        if not url:
+            return JSONResponse(
+                status_code=400,
+                content={"error": "URL is required"}
+            )
+        
+        # Make request to the backend
+        async with httpx.AsyncClient() as client:
+            response = await client.request(
+                method=method,
+                url=url,
+                headers=headers,
+                json=body if body else None,
+                timeout=30.0
+            )
+            
+            return JSONResponse(
+                status_code=response.status_code,
+                content={
+                    "status": response.status_code,
+                    "headers": dict(response.headers),
+                    "data": response.json() if response.headers.get("content-type", "").startswith("application/json") else response.text
+                }
+            )
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(e), "details": traceback.format_exc()}
+        )
 
 # --- Inject Debug Endpoints ---
 
@@ -164,6 +296,10 @@ async def debug_endpoint(request: Request):
         traceback.print_exc()
         return {"error": str(e), "details": traceback.format_exc()}
 
+def main():
+    """Main entry point for the server"""
+    print(f"Starting Wrapped Server on {SERVER_HOST}:{SERVER_PORT}...")
+    uvicorn.run(app, host=SERVER_HOST, port=SERVER_PORT)
+
 if __name__ == "__main__":
-    print(f"Starting Wrapped Server on port {SERVER_PORT}...")
-    uvicorn.run(app, host="0.0.0.0", port=SERVER_PORT)
+    main()
