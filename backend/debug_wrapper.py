@@ -8,8 +8,9 @@ from fastapi import Request, HTTPException
 from pydantic import BaseModel
 from debug_utils import Tracer
 
-# Load config
-with open('config.json', 'r') as f:
+# Load config (from root directory)
+config_path = os.path.join(os.path.dirname(__file__), '..', 'config.json')
+with open(config_path, 'r') as f:
     config = json.load(f)
 
 SERVER_PORT = config.get('serverPort', 8011)

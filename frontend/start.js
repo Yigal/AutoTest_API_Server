@@ -1,6 +1,7 @@
 const { spawn, exec } = require('child_process');
 const kill = require('kill-port');
-const config = require('./config.json');
+const path = require('path');
+const config = require('../config.json');
 const fs = require('fs');
 
 const TESTER_PORT = config.testerPort || 8010;
@@ -25,7 +26,9 @@ async function start() {
     if (config.autoGenerateEndpoints) {
         console.log('Generating endpoints configuration...');
         await new Promise((resolve, reject) => {
-            const generator = spawn('python3', ['generate_endpoints.py']);
+            const generator = spawn('python3', ['../backend/generate_endpoints.py'], {
+                cwd: path.join(__dirname, '..')
+            });
 
             generator.stdout.on('data', (data) => {
                 console.log(`[Generator]: ${data}`);
@@ -52,9 +55,10 @@ async function start() {
 
     // We use the debug_wrapper.py to run the user's server with debugger endpoints injected
     // The wrapper reads config.json to find the actual pythonServerFile
-    const wrapperFile = 'debug_wrapper.py';
+    const wrapperFile = path.join(__dirname, '../backend/debug_wrapper.py');
 
     const pythonServer = spawn('python3', [wrapperFile], {
+        cwd: path.join(__dirname, '..'),
         env: { ...process.env, PORT: SERVER_PORT.toString() }
     });
 

@@ -152,19 +152,20 @@ def parse_fastapi_file(file_path: str) -> List[Dict[str, Any]]:
     return endpoints
 
 def main():
-    # Read config
+    # Read config (from root directory)
+    config_path = os.path.join(os.path.dirname(__file__), '..', 'config.json')
     try:
-        with open("config.json", "r") as f:
+        with open(config_path, "r") as f:
             config = json.load(f)
     except FileNotFoundError:
         print("config.json not found. Using defaults.")
         config = {
             "pythonServerFile": "./api_server.py",
-            "endpointsOutputFile": "./config/endpoints.json"
+            "endpointsOutputFile": "frontend/config/endpoints.json"
         }
 
     server_file = config.get("pythonServerFile", "./api_server.py")
-    output_file = config.get("endpointsOutputFile", "./config/endpoints.json")
+    output_file = config.get("endpointsOutputFile", "frontend/config/endpoints.json")
 
     if not os.path.exists(server_file):
         print(f"Error: Server file {server_file} not found.")

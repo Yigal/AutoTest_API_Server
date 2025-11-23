@@ -3,7 +3,6 @@
   "serverPort": 8011,
   "autoKillPorts": true,
   "pythonServerFile": "/Users/yigalweinberger/Documents/Code/startups/docker_agents_server/test_server.py",
-  "endpointsOutputFile": "./config/endpoints.json",
-  "autoGenerateEndpoints": true,
-  "rabbitmqQueue": "fastapi_to_test_website_requests"
+  "endpointsOutputFile": "frontend/config/endpoints.json",
+  "autoGenerateEndpoints": true
 }

@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
-const config = require('./config.json');
+const config = require('../config.json');
 
 const app = express();
 const PORT = config.testerPort || 8010;
@@ -15,7 +15,7 @@ const axios = require('axios');
 
 // Endpoint to get the generated endpoints configuration
 app.get('/api/endpoints', (req, res) => {
-    const endpointsPath = path.join(__dirname, config.endpointsOutputFile || './config/endpoints.json');
+    const endpointsPath = path.join(__dirname, config.endpointsOutputFile || 'config/endpoints.json');
 
     fs.readFile(endpointsPath, 'utf8', (err, data) => {
         if (err) {
